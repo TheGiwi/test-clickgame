@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click the Button Game</title>
+    <style>
+        canvas {
+            background: #ffffff;
+            display: block;
+            margin: 0 auto;
+        }
+        #score, #timer {
+            font-size: 24px;
+            text-align: center;
+        }
+        #button {
+            width: 200px;
+            height: 100px;
+            background-color: #0080ff;
+            color: white;
+            font-size: 24px;
+            border: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 50px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="timer">Time: 60</div>
+    <div id="score">Score: 0</div>
+    <button id="button">Click Me!</button>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const button = document.getElementById('button');
+        const timerDiv = document.getElementById('timer');
+        const scoreDiv = document.getElementById('score');
+
+        // Load assets
+        const barbellUp = new Image();
+        const barbellDown = new Image();
+        barbellUp.src = 'barbell_up.png';
+        barbellDown.src = 'barbell_down.png';
+
+        let startTime = Date.now();
+        let score = 0;
+        let animationState = false;
+        let remainingTime = 60;
+
+        function updateTimer() {
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            remainingTime = Math.max(60 - elapsedTime, 0);
+            timerDiv.textContent = `Time: ${Math.floor(remainingTime)}`;
+
+            if (remainingTime === 0) {
+                endGame();
+            }
+        }
+
+        function updateScore() {
+            scoreDiv.textContent = `Score: ${score}`;
+        }
+
+        function drawAnimation() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (animationState) {
+                ctx.drawImage(barbellDown, 300, 150, 200, 200);
+            } else {
+                ctx.drawImage(barbellUp, 300, 150, 200, 200);
+            }
+        }
+
+        function gameLoop() {
+            if (remainingTime > 0) {
+                updateTimer();
+                drawAnimation();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function endGame() {
+            button.disabled = true;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '48px Arial';
+            ctx.fillStyle = 'black';
+            ctx.fillText(`Final Score: ${score}`, canvas.width / 2 - 150, canvas.height / 2);
+        }
+
+        button.addEventListener('click', () => {
+            if (remainingTime > 0) {
+                score++;
+                animationState = !animationState;
+                updateScore();
+            }
+        });
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
